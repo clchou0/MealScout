@@ -18,7 +18,7 @@ enum MealOccasion : Hashable, Codable, CaseIterable {
         case .lunch: "Lunch"
         case .afternoonTea: "Afternoon Tea"
         case .dinner: "Dinner"
-        case .supper: "Supper"
+        case .supper: "Supper (Late Night)"
         case .snack: "Snack"
         case .dessert: "Dessert"
         case .beverage: "Beverage"
@@ -28,13 +28,9 @@ enum MealOccasion : Hashable, Codable, CaseIterable {
 }
 
 struct RatingScores {
-    var quality: Double = 0
-    var price: Double = 0
-    var portion: Double = 0
-    
-    var isValid: Bool {
-        return quality >= 1.0 && price >= 1.0 && portion >= 1.0
-    }
+    var quality: Double = 5.0
+    var price: Double = 5.0
+    var portion: Double = 5.0
 }
 
 struct Deal {
@@ -54,15 +50,18 @@ struct Deal {
 }
 
 struct DishEntry: Identifiable {
-    let id: UUID
-    var dishName: String
-    var price: Double
-    var quantity: Int
+    let id: UUID = UUID()
+    var dishName: String = ""
+    var price: Double = 0
+    var quantity: Int = 1
+    
+    var isValid: Bool {
+        return !dishName.isEmpty && price >= 0.0 && quantity > 0
+    }
 }
 
 struct Review: Identifiable {
     let id: UUID
-    var time: Date
     var mealOccasion: MealOccasion
     
     // Prices of all consumed dishes

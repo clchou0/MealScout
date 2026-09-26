@@ -20,7 +20,12 @@ class LogReviewViewModel {
     var description: String = ""
     
     var usedDeal: Deal = Deal()
-    var totalPrice: Double = 0.0
+    var totalPrice: Double = 0
+    
+    var displayedTotalPrice: Double {
+        // otherwise the total of all the prices
+        return totalPrice != 0 ? totalPrice : dishes.reduce(0) { $0 + $1.price }
+    }
     
     init(restaurantIdentifier: MapIdentifier, restaurantName: String) {
         self.restaurantIdentifier = restaurantIdentifier
