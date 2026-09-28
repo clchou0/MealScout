@@ -7,24 +7,69 @@
 
 import Foundation
 
-enum LogReviewError {
+enum LogReviewError: Equatable, LocalizedError {
     case invalidMealOccasion
     case dishesEmpty
+    case invalidDish
     case invalidPrice
     case invalidDeal
+    case invalidDiners
+    case emptyReview
+    case mapKeyError
+    case databaseError
     
     var errorDescription: String? {
         switch self {
-        case .invalidMealOccasion: "Please enter when you had the meal!"
-        case .dishesEmpty: "Please enter at least one dish you had for the meal!"
-        case .invalidPrice: "Please enter a valid value for the price!"
-        case .invalidDeal: "Please leave the deal empty or enter a valid value!"
+        case .invalidMealOccasion: "Please enter when you had the meal"
+        case .dishesEmpty: "Please enter at least one dish you had for the meal"
+        case .invalidDish: "Please enter corect details for the dishes"
+        case .invalidPrice: "Please enter a valid value for total price"
+        case .invalidDeal: "Please leave the deal empty or enter a valid value"
+        case .invalidDiners: "Please enter a valid number of diners"
+        case .emptyReview: "Please enter some reviews about the meal"
+        case .mapKeyError: "Map has an issue"
+        case .databaseError: "Database failure. Please try again"
         }
     }
 }
 
 class LogReviewUseCase {
-    func execute() {
+    private let reviewRepository: ReviewRepository
+    private let restaurantRepository: RestaurantRepository
+    
+    init(reviewRepository: ReviewRepository = CoreDataReviewRepository(),
+         restaurantRepository: RestaurantRepository = CoreDataRestaurantRepository()) {
+        self.reviewRepository = reviewRepository
+        self.restaurantRepository = restaurantRepository
+    }
+    
+    func execute(
+        mealOccasion: MealOccasion,
+        dishes: [DishEntry],
+        numDiners: Int,
+        totalPrice: Double,
+        ratings: RatingScores,
+        description: String,
+        usedDeal: Deal,
+        restaurantIdentifier: MapIdentifier,
+        restaurantName: String,
+        restaurantTags: [CuisineTag]
+    ) -> Result<Void, LogReviewError> {
+        guard mealOccasion != .none else { return .failure(.invalidMealOccasion) }
+        guard numDiners > 0 else { return .failure(.invalidDiners) }
+        guard !dishes.isEmpty else { return .failure(.dishesEmpty) }
+        guard !dishes.contains(where: { !$0.isValid }) else { return .failure(.invalidDish) }
+        guard totalPrice > 0 else { return .failure(.invalidPrice) }
+        guard !description.isEmpty else { return .failure(.emptyReview) }
+        guard usedDeal.isValid else { return .failure(.invalidDeal) }
         
+
+        // find restaurant by id key, if not found would create one and geyt back to it
+        let foundRestaurant = restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName)
+        
+        let createdReview = Review(id: UUID(), mealOccasion: mealOccasion, dishes: dishes, numDiners: numDiners, totalPrice: totalPrice, ratings: ratings, description: description, restaurant: foundRestaurant)
+        reviewRepository.save(createdReview)
+        
+        return .success(())
     }
 }

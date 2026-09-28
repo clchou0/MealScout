@@ -25,7 +25,6 @@ struct CountryGlossary {
         "BR", // Brazil
         "IN", // India
         "KR", // Korea
-        "PK", // Pakistan
         "LB", // Lebanon
         "TR", // Turkey
         "GR", // Greece
@@ -49,7 +48,6 @@ struct CountryGlossary {
         "BR": "Brazilian",
         "IN": "Indian",
         "KR": "Korean",
-        "PK": "Pakistani",
         "LB": "Lebanese",
         "TR": "Turkish",
         "GR": "Greek",
@@ -57,7 +55,7 @@ struct CountryGlossary {
     ]
 }
 
-enum CuisineTag: Hashable {
+enum CuisineTag: Hashable, Codable {
     // Non-nationality
     case cafe
     case fastFood

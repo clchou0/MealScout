@@ -21,7 +21,7 @@ struct LogReviewView: View {
                 Text("Reviewing ")
                 Text(viewModel.restaurantName).fontWeight(.bold)
             }
-            List {
+            Form {
                 
                 Section {
                     mealPicker
@@ -89,16 +89,19 @@ struct LogReviewView: View {
                         .foregroundStyle(.gray)
                 }
             }
-            .listStyle(.sidebar)
-            Button("Submit") {
-                
-            }
+            .formStyle(.automatic)
             
+            Button("Submit") {
+                viewModel.submitReview()
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 10))
         }
         .padding(10)
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
+        .resultAlert(alertItem: $viewModel.alertItem)
     }
     
     var mealPicker: some View {
@@ -111,7 +114,9 @@ struct LogReviewView: View {
                 }
                 .labelsHidden()
                 .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
             }
+            .pickerStyle(.menu)
         }
     }
     

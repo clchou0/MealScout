@@ -8,7 +8,7 @@
 import Foundation
 import MapKit
 
-enum MealOccasion : Hashable, Codable, CaseIterable {
+enum MealOccasion: Hashable, Codable, CaseIterable {
     case breakfast, lunch, dinner, brunch, afternoonTea, snack, supper, dessert, beverage, none
     // I would define supper as late night meal
     var label: String {
@@ -27,13 +27,13 @@ enum MealOccasion : Hashable, Codable, CaseIterable {
     }
 }
 
-struct RatingScores {
+struct RatingScores: Codable {
     var quality: Double = 5.0
     var price: Double = 5.0
     var portion: Double = 5.0
 }
 
-struct Deal {
+struct Deal: Codable {
     var redeemSource: String = ""
     var percentOff: Int = 0
     var dollarsOff: Double = 0.0
@@ -49,8 +49,8 @@ struct Deal {
     }
 }
 
-struct DishEntry: Identifiable {
-    let id: UUID = UUID()
+struct DishEntry: Identifiable, Codable {
+    var id: UUID = UUID()
     var dishName: String = ""
     var price: Double = 0
     var quantity: Int = 1
@@ -60,7 +60,7 @@ struct DishEntry: Identifiable {
     }
 }
 
-struct Review: Identifiable {
+struct Review: Identifiable, Codable {
     let id: UUID
     var mealOccasion: MealOccasion
     
@@ -75,4 +75,16 @@ struct Review: Identifiable {
     var usedDeal: Deal? = nil
     
     let restaurant: Restaurant
+    
+//    init(mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurant: Restaurant) {
+//        self.id = UUID()
+//        self.mealOccasion = mealOccasion
+//        self.dishes = dishes
+//        self.numDiners = numDiners
+//        self.totalPrice = totalPrice
+//        self.ratings = ratings
+//        self.description = description
+//        self.usedDeal = usedDeal
+//        self.restaurant = restaurant
+//    }
 }

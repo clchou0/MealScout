@@ -21,14 +21,39 @@ class LogReviewViewModel {
     
     var usedDeal: Deal = Deal()
     var totalPrice: Double = 0
+    var restaurantTags: [CuisineTag] = []
     
     var displayedTotalPrice: Double {
         // otherwise the total of all the prices
         return totalPrice != 0 ? totalPrice : dishes.reduce(0) { $0 + $1.price }
     }
     
+    var alertItem: AlertItem? = nil
+    let useCase: LogReviewUseCase = LogReviewUseCase()
+    
     init(restaurantIdentifier: MapIdentifier, restaurantName: String) {
         self.restaurantIdentifier = restaurantIdentifier
         self.restaurantName = restaurantName
+    }
+    
+    func submitReview() {
+        let result = useCase.execute(
+            mealOccasion: mealOccasion,
+            dishes: dishes, numDiners: numDiners,
+            totalPrice: displayedTotalPrice,
+            ratings: ratings,
+            description: description,
+            usedDeal: usedDeal,
+            restaurantIdentifier: restaurantIdentifier,
+            restaurantName: restaurantName,
+            restaurantTags: restaurantTags
+        )
+        
+        switch (result) {
+        case .failure(let error):
+            alertItem = AlertItem(title: "Error", message: error.errorDescription ?? "Unknown...")
+        case .success():
+            alertItem = AlertItem(title: "Success", message: "Submitted!")
+        }
     }
 }
