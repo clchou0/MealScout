@@ -10,13 +10,18 @@ import MapKit
 
 struct LogReviewView: View {
     @State var viewModel: LogReviewViewModel
+    @Environment(\.dismiss) private var dismiss
     
     init(restaurantIdentifier: MapIdentifier, restaurantName: String) {
-        self.viewModel = LogReviewViewModel(restaurantIdentifier: restaurantIdentifier, restaurantName: restaurantName)
+        self.viewModel = LogReviewViewModel(
+            restaurantIdentifier: restaurantIdentifier,
+            restaurantName: restaurantName
+        )
+        print("Start review...")
     }
     
     var body: some View {
-        NavigationStack {
+        VStack {
             HStack {
                 Text("Reviewing ")
                 Text(viewModel.restaurantName).fontWeight(.bold)
@@ -26,7 +31,6 @@ struct LogReviewView: View {
                 Section {
                     mealPicker
                     peopleEntry
-                    dealSection
                 } header: {
                     Text("Meal Time and Deals")
                         .font(serifFont)
@@ -34,10 +38,17 @@ struct LogReviewView: View {
                 }
                 
                 Section {
+                    dealSection
+                } header: {
+                    Text("Did you use a deal?")
+                        .font(serifFont)
+                        .foregroundStyle(.gray)
+                }
+                
+                Section {
                     if ($viewModel.dishes.isEmpty) {
-                        Text("Please add your dishes of the day...")
-                            .opacity(0.7)
-                            .backgroundStyle(.gray)
+                        Text("Please add your dishes using the plus button...")
+                            .dimText()
                     }
                     dishSection
                 } header: {
@@ -91,7 +102,7 @@ struct LogReviewView: View {
             }
             .formStyle(.automatic)
             
-            Button("Submit") {
+            Button("Submit Review") {
                 viewModel.submitReview()
             }
             .buttonStyle(.borderedProminent)
@@ -101,7 +112,21 @@ struct LogReviewView: View {
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
+        .interactiveDismissDisabled()
         .resultAlert(alertItem: $viewModel.alertItem)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    viewModel.handleLeaveScreen { dismiss() }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                }
+            }
+        }
     }
     
     var mealPicker: some View {
@@ -122,8 +147,8 @@ struct LogReviewView: View {
     
     var peopleEntry: some View {
         HStack {
-            Text("Dining People: ")
-            TextField("0", value: Binding<Int?>(
+            Text("Number of Diners: ")
+            TextField("", value: Binding<Int?>(
                 get: { viewModel.numDiners == 0 ? nil : viewModel.numDiners },
                 set: { viewModel.numDiners = max(0, $0 ?? 0) }
             ), format: .number)
@@ -139,41 +164,44 @@ struct LogReviewView: View {
     
     var dealSection: some View {
         let dealBinding = $viewModel.usedDeal
-        return VStack(spacing: 10) {
+        return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Did you use a deal?")
-                    .font(serifFont)
-                    .foregroundStyle(.gray)
-                Spacer()
-            }
-            HStack {
-                Text("Source: ")
+                Text("Source: ").fontWeight(.semibold)
                 TextField("i.e. Eatclub, Uber Eats dine out...", text: dealBinding.redeemSource)
             }
             HStack {
-                Text("Discount: ")
-                TextField("0", value: Binding<Int?>(
+                Text("Discount: ").fontWeight(.semibold)
+                Spacer()
+                
+                TextField("", value: Binding<Int?>(
                     get: { viewModel.usedDeal.percentOff == 0 ? nil : viewModel.usedDeal.percentOff },
                     set: { viewModel.usedDeal.percentOff = max(0, $0 ?? 0) }
                 ), format: .number)
-                .frame(width: 60)
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: 60)
                 Text("% off")
-                Spacer()
             }
             
             HStack {
-                Text("Price Discount: $")
+                Text("or ")
+                Text("Price Discount:").fontWeight(.semibold)
+                Spacer()
+                
+                Text("$")
                 TextField("", value: Binding<Double?>(
                     get: { viewModel.usedDeal.dollarsOff == 0 ? nil : viewModel.usedDeal.dollarsOff },
                     set: { viewModel.usedDeal.dollarsOff = max(0, (($0 ?? 0) * 100).rounded(.down) / 100) }
                 ), format: .number)
                 .labelsHidden()
-                Spacer()
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: 80)
             }
             
-            Text("Brief information: ")
-            TextField("", text: dealBinding.notes)
+            Text("Brief information: ").fontWeight(.semibold)
+            TextField("Time / date restrictions, price requirements...", text: dealBinding.notes)
                 .lineLimit(5)
+                .textFieldStyle(.roundedBorder)
         }
     }
     

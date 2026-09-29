@@ -54,7 +54,7 @@ class LogReviewUseCase {
         restaurantIdentifier: MapIdentifier,
         restaurantName: String,
         restaurantTags: [CuisineTag]
-    ) -> Result<Void, LogReviewError> {
+    ) -> Result<String, LogReviewError> {
         guard mealOccasion != .none else { return .failure(.invalidMealOccasion) }
         guard numDiners > 0 else { return .failure(.invalidDiners) }
         guard !dishes.isEmpty else { return .failure(.dishesEmpty) }
@@ -67,9 +67,17 @@ class LogReviewUseCase {
         // find restaurant by id key, if not found would create one and geyt back to it
         let foundRestaurant = restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName)
         
-        let createdReview = Review(id: UUID(), mealOccasion: mealOccasion, dishes: dishes, numDiners: numDiners, totalPrice: totalPrice, ratings: ratings, description: description, restaurant: foundRestaurant)
+        let createdReview = Review(
+            mealOccasion: mealOccasion,
+            dishes: dishes,
+            numDiners: numDiners,
+            totalPrice: totalPrice,
+            ratings: ratings,
+            description: description,
+            restaurant: foundRestaurant
+        )
         reviewRepository.save(createdReview)
         
-        return .success(())
+        return .success((""))
     }
 }

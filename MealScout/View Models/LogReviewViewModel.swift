@@ -24,7 +24,7 @@ class LogReviewViewModel {
     var restaurantTags: [CuisineTag] = []
     
     var displayedTotalPrice: Double {
-        // otherwise the total of all the prices
+        // Note: We asked for the original prices, and the user might have paid different from the aggregate of the items.
         return totalPrice != 0 ? totalPrice : dishes.reduce(0) { $0 + $1.price }
     }
     
@@ -52,8 +52,17 @@ class LogReviewViewModel {
         switch (result) {
         case .failure(let error):
             alertItem = AlertItem(title: "Error", message: error.errorDescription ?? "Unknown...")
-        case .success():
-            alertItem = AlertItem(title: "Success", message: "Submitted!")
+        case .success(let message):
+            alertItem = AlertItem(title: "Success", message: message)
         }
+    }
+    
+    func handleLeaveScreen(delegate: @escaping () -> Void) {
+        alertItem = AlertItem(
+            title: "Exit",
+            message: "Your changes will not be saved...",
+            delegate: { delegate() },
+            cancelDelegate: {}
+        )
     }
 }

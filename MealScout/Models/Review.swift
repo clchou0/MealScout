@@ -63,6 +63,7 @@ struct DishEntry: Identifiable, Codable {
 struct Review: Identifiable, Codable {
     let id: UUID
     var mealOccasion: MealOccasion
+    var writtenDate: Date
     
     // Prices of all consumed dishes
     var dishes: [DishEntry]
@@ -76,15 +77,16 @@ struct Review: Identifiable, Codable {
     
     let restaurant: Restaurant
     
-//    init(mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurant: Restaurant) {
-//        self.id = UUID()
-//        self.mealOccasion = mealOccasion
-//        self.dishes = dishes
-//        self.numDiners = numDiners
-//        self.totalPrice = totalPrice
-//        self.ratings = ratings
-//        self.description = description
-//        self.usedDeal = usedDeal
-//        self.restaurant = restaurant
-//    }
+    init(mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurant: Restaurant) {
+        self.id = UUID()
+        self.mealOccasion = mealOccasion
+        self.writtenDate = .now
+        self.dishes = dishes
+        self.numDiners = numDiners
+        self.totalPrice = totalPrice
+        self.ratings = ratings
+        self.description = description
+        self.usedDeal = usedDeal
+        self.restaurant = restaurant
+    }
 }
