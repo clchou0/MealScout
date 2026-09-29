@@ -78,6 +78,6 @@ class LogReviewUseCase {
         )
         reviewRepository.save(createdReview)
         
-        return .success((""))
+        return .success(("Successfully logged review for \(createdReview.mealOccasion) at \(createdReview.restaurant.name)"))
     }
 }

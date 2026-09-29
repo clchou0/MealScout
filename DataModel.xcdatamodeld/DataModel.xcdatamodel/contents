@@ -3,9 +3,11 @@
     <entity name="RestaurantEntity" representedClassName="RestaurantEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="restaurantData" optional="YES" attributeType="Binary"/>
+        <relationship name="reviews" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ReviewEntity" inverseName="restaurant" inverseEntity="ReviewEntity"/>
     </entity>
     <entity name="ReviewEntity" representedClassName="ReviewEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="reviewData" optional="YES" attributeType="Binary"/>
+        <relationship name="restaurant" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RestaurantEntity" inverseName="reviews" inverseEntity="RestaurantEntity"/>
     </entity>
 </model>

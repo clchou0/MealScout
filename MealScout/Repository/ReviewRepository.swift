@@ -13,6 +13,7 @@ protocol ReviewRepository {
     func fetchAll() -> [Review]
     func save(_ review: Review)
     func delete(id: UUID)
+    func getReviewsForRestaurant(mapIdentifier: MapIdentifier) -> [Review]
 }
 
 // @MainActor
@@ -72,5 +73,9 @@ final class CoreDataReviewRepository: ReviewRepository {
             stack.context.delete(entity)
             try? stack.save()
         }
+    }
+    
+    func getReviewsForRestaurant(mapIdentifier: MapIdentifier) -> [Review] {
+        return fetchAll().filter { $0.restaurant.id == mapIdentifier }
     }
 }

@@ -14,7 +14,7 @@ class LogReviewViewModel {
     
     var mealOccasion: MealOccasion = .none
     var dishes: [DishEntry] = []
-    var numDiners: Int = 0
+    var numDiners: Int = 1
     
     var ratings: RatingScores = RatingScores()
     var description: String = ""
@@ -36,7 +36,7 @@ class LogReviewViewModel {
         self.restaurantName = restaurantName
     }
     
-    func submitReview() {
+    func submitReview(dismiss: @escaping () -> Void) {
         let result = useCase.execute(
             mealOccasion: mealOccasion,
             dishes: dishes, numDiners: numDiners,
@@ -53,15 +53,15 @@ class LogReviewViewModel {
         case .failure(let error):
             alertItem = AlertItem(title: "Error", message: error.errorDescription ?? "Unknown...")
         case .success(let message):
-            alertItem = AlertItem(title: "Success", message: message)
+            alertItem = AlertItem(title: "Success", message: message, delegate: { dismiss() })
         }
     }
     
-    func handleLeaveScreen(delegate: @escaping () -> Void) {
+    func handleLeaveScreen(dismiss: @escaping () -> Void) {
         alertItem = AlertItem(
             title: "Exit",
             message: "Your changes will not be saved...",
-            delegate: { delegate() },
+            delegate: { dismiss() },
             cancelDelegate: {}
         )
     }

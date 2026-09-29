@@ -53,7 +53,7 @@ struct LogReviewView: View {
                     dishSection
                 } header: {
                     HStack {
-                        Text("Original prices for the dishes")
+                        Text("Original prices for dishes")
                             .font(serifFont)
                             .foregroundStyle(.gray)
                         Spacer()
@@ -103,7 +103,7 @@ struct LogReviewView: View {
             .formStyle(.automatic)
             
             Button("Submit Review") {
-                viewModel.submitReview()
+                viewModel.submitReview { dismiss() }
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.roundedRectangle(radius: 10))

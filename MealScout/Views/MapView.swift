@@ -29,6 +29,7 @@ struct MapView: View {
         }) {
             if let item = viewModel.mapItem {
                 RestaurantSheet(mapItem: item)
+                    .cornerRadius(0)
             }
         }.presentationDetents([.medium])
     }
