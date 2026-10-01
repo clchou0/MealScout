@@ -5,6 +5,8 @@
 //  Created by CLChou on 2026/9/29.
 //
 
+import Foundation
+
 class FetchRestaurantDetailsUseCase {
     private let reviewRepository: ReviewRepository
     private let restaurantRepository: RestaurantRepository
@@ -16,6 +18,19 @@ class FetchRestaurantDetailsUseCase {
     }
     
     func fetchReviewsFromRestaurant(mapIdentifier: MapIdentifier) -> [Review] {
-        return reviewRepository.getReviewsForRestaurant(mapIdentifier: mapIdentifier)
+        do {
+            return try reviewRepository.getReviewsForRestaurant(mapIdentifier: mapIdentifier)
+        } catch {
+            print("\(error.localizedDescription)")
+        }
+        return []
+    }
+    
+    func fetchTagsFromRestaurant(mapIdentifier: MapIdentifier) -> [CuisineTag] {
+        do {
+            if let restaurant = try restaurantRepository.find(by: mapIdentifier) { return restaurant.tags }
+        }
+        catch { print("\(error.localizedDescription)") }
+        return []
     }
 }

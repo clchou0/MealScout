@@ -21,7 +21,11 @@ class LogReviewViewModel {
     
     var usedDeal: Deal = Deal()
     var totalPrice: Double = 0
-    var restaurantTags: [CuisineTag] = []
+    
+    var newRestaurantTags: [CuisineTag] = []
+    var originalTags: [CuisineTag]
+    
+    var newSelection: CuisineTag? = nil
     
     var displayedTotalPrice: Double {
         // Note: We asked for the original prices, and the user might have paid different from the aggregate of the items.
@@ -34,6 +38,8 @@ class LogReviewViewModel {
     init(restaurantIdentifier: MapIdentifier, restaurantName: String) {
         self.restaurantIdentifier = restaurantIdentifier
         self.restaurantName = restaurantName
+        
+        self.originalTags = useCase.retrieveTagsForRestaurant(mapIdentifier: restaurantIdentifier)
     }
     
     func submitReview(dismiss: @escaping () -> Void) {
@@ -46,7 +52,7 @@ class LogReviewViewModel {
             usedDeal: usedDeal,
             restaurantIdentifier: restaurantIdentifier,
             restaurantName: restaurantName,
-            restaurantTags: restaurantTags
+            addedRestaurantTags: newRestaurantTags
         )
         
         switch (result) {

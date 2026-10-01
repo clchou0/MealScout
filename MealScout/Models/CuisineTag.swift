@@ -55,7 +55,7 @@ struct CountryGlossary {
     ]
 }
 
-enum CuisineTag: Hashable, Codable {
+enum CuisineTag: Hashable, Codable, Equatable {
     // Non-nationality
     case cafe
     case fastFood
@@ -110,12 +110,48 @@ enum CuisineTag: Hashable, Codable {
         case .bakery: "Bakery"
         case .buffet: "Buffet"
         case .seafood: "Seafood"
-        case .bbq: "BBQ"
+        case .bbq: "Barbeque"
         case .fingerFood: "Finger Food"
         case .country(let code):
             CountryGlossary.cuisineNameByCode[code] ?? code
         case .international(let name):
             name
         }
+    }
+}
+
+extension CuisineTag: CaseIterable {
+    public static var allCases: [CuisineTag] {
+        [
+            .cafe,
+            .fastFood,
+            .dessert,
+            .drinksFocused,
+            .bakery,
+            .buffet,
+            .seafood,
+            .bbq,
+            .fingerFood,
+            .country(code: "TH"),
+            .country(code: "JP"),
+            .country(code: "CN"),
+            .country(code: "MX"),
+            .country(code: "US"),
+            .country(code: "DE"),
+            .country(code: "IT"),
+            .country(code: "ES"),
+            .country(code: "FR"),
+            .country(code: "TW"),
+            .country(code: "ID"),
+            .country(code: "MY"),
+            .country(code: "VN"),
+            .country(code: "BR"),
+            .country(code: "IN"),
+            .country(code: "KR"),
+            .country(code: "LB"),
+            .country(code: "TR"),
+            .country(code: "GR"),
+            .country(code: "GB")
+        ].sorted{ $0.labelName < $1.labelName }
     }
 }

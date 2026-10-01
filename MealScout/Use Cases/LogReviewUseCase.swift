@@ -28,7 +28,7 @@ enum LogReviewError: Equatable, LocalizedError {
         case .invalidDiners: "Please enter a valid number of diners"
         case .emptyReview: "Please enter some reviews about the meal"
         case .mapKeyError: "Map has an issue"
-        case .databaseError: "Database failure. Please try again"
+        case .databaseError: "Database failure, please try again"
         }
     }
 }
@@ -53,7 +53,7 @@ class LogReviewUseCase {
         usedDeal: Deal,
         restaurantIdentifier: MapIdentifier,
         restaurantName: String,
-        restaurantTags: [CuisineTag]
+        addedRestaurantTags: [CuisineTag]
     ) -> Result<String, LogReviewError> {
         guard mealOccasion != .none else { return .failure(.invalidMealOccasion) }
         guard numDiners > 0 else { return .failure(.invalidDiners) }
@@ -64,20 +64,33 @@ class LogReviewUseCase {
         guard usedDeal.isValid else { return .failure(.invalidDeal) }
         
 
-        // find restaurant by id key, if not found would create one and geyt back to it
-        let foundRestaurant = restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName)
-        
-        let createdReview = Review(
-            mealOccasion: mealOccasion,
-            dishes: dishes,
-            numDiners: numDiners,
-            totalPrice: totalPrice,
-            ratings: ratings,
-            description: description,
-            restaurant: foundRestaurant
-        )
-        reviewRepository.save(createdReview)
-        
-        return .success(("Successfully logged review for \(createdReview.mealOccasion) at \(createdReview.restaurant.name)"))
+        do {
+            // find restaurant by id key, if not found would create one and geyt back to it
+            var foundRestaurant = try restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName)
+            
+            foundRestaurant.tags += addedRestaurantTags
+            try restaurantRepository.save(foundRestaurant)
+            
+            let createdReview = Review(
+                mealOccasion: mealOccasion,
+                dishes: dishes,
+                numDiners: numDiners,
+                totalPrice: totalPrice,
+                ratings: ratings,
+                description: description,
+                restaurantId: foundRestaurant.id
+            )
+            return .success(("Successfully logged review for \(createdReview.mealOccasion) at \(foundRestaurant.name)"))
+        }
+        catch {
+            return .failure(.databaseError)
+        }
+    }
+    
+    func retrieveTagsForRestaurant(mapIdentifier: MapIdentifier) -> [CuisineTag] {
+        do {
+            guard let restaurant = try restaurantRepository.find(by: mapIdentifier) else { return [] }
+            return restaurant.tags
+        } catch { return [] }
     }
 }

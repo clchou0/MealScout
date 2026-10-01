@@ -99,6 +99,16 @@ struct LogReviewView: View {
                         .font(serifFont)
                         .foregroundStyle(.gray)
                 }
+                
+                Section {
+                    TagSelectorView(
+                        originalSelectedTags: viewModel.originalTags, newSelectedTags: $viewModel.newRestaurantTags,
+                        newSelection: $viewModel.newSelection)
+                } header: {
+                    Text("Extra tags for this restaurant?")
+                        .font(serifFont)
+                        .foregroundStyle(.gray)
+                }
             }
             .formStyle(.automatic)
             
@@ -125,6 +135,14 @@ struct LogReviewView: View {
                         Text("Back")
                     }
                 }
+            }
+        }
+        .onChange(of: viewModel.newSelection) {
+            // Add the respective value and clear out selection
+            if let selection = viewModel.newSelection {
+                print("\(selection.labelName) added")
+                viewModel.newRestaurantTags.append(selection)
+                viewModel.newSelection = nil
             }
         }
     }
@@ -199,9 +217,10 @@ struct LogReviewView: View {
             }
             
             Text("Brief information: ").fontWeight(.semibold)
-            TextField("Time / date restrictions, price requirements...", text: dealBinding.notes)
+            Text("Time / date restrictions, price requirements...").dimText()
+            TextEditor(text: dealBinding.notes)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
                 .lineLimit(5)
-                .textFieldStyle(.roundedBorder)
         }
     }
     

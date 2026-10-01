@@ -22,6 +22,7 @@ struct RestaurantSheet: View {
                     .padding()
                     .background(Color(.systemBackground))
                 
+                
                 Divider()
 
                 // 📜 2. SCROLLABLE REVIEWS LIST (Only this scrolls)
@@ -80,6 +81,34 @@ struct RestaurantSheet: View {
             Text("Be the first to review this spot and share your thoughts!!")
         }
     }
+    
+    var tagsBar: some View {
+        ScrollView (.horizontal) {
+            HStack {
+                ForEach (viewModel.cuisineTags, id: \.self) { tag in
+                    HStack(spacing: 8) {
+                        // Tag Text
+                        Text("\(tag.displayIcon) \(tag.labelName)")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(UIColor.secondarySystemFill))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    )
+                }
+            }
+        }
+    }
+    
     var reviewsSection: some View {
         ForEach(viewModel.reviews) { review in
             NavigationLink {

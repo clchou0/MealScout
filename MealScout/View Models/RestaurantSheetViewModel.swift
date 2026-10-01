@@ -14,10 +14,20 @@ class RestaurantSheetViewModel {
     var mapItem: MKMapItem
     let useCase = FetchRestaurantDetailsUseCase()
     var reviews: [Review] = []
+    var cuisineTags: [CuisineTag] = []
     
     init(mapItem: MKMapItem) {
         self.mapItem = mapItem
         loadReviews()
+    }
+    
+    func loadTags() {
+        if let identifier = mapItem.identifier {
+            self.cuisineTags = useCase.fetchTagsFromRestaurant(mapIdentifier: identifier).sorted{ $0.labelName < $1.labelName }
+        } else {
+            self.cuisineTags = []
+            return
+        }
     }
     
     func loadReviews() {

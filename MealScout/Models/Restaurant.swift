@@ -13,7 +13,7 @@ typealias MapIdentifier = MKMapItem.Identifier
 struct Restaurant: Identifiable, Codable {
     let id: MapIdentifier
     var name: String
-    var tag: [CuisineTag]
+    var tags: [CuisineTag]
     
 //    init(id: MapIdentifier, name: String, tag: [CuisineTag]) {
 //        self.id = id

@@ -75,9 +75,9 @@ struct Review: Identifiable, Codable {
     
     var usedDeal: Deal? = nil
     
-    let restaurant: Restaurant
+    let restaurantId: MapIdentifier
     
-    init(mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurant: Restaurant) {
+    init(mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurantId: MapIdentifier) {
         self.id = UUID()
         self.mealOccasion = mealOccasion
         self.writtenDate = .now
@@ -87,6 +87,6 @@ struct Review: Identifiable, Codable {
         self.ratings = ratings
         self.description = description
         self.usedDeal = usedDeal
-        self.restaurant = restaurant
+        self.restaurantId = restaurantId
     }
 }
