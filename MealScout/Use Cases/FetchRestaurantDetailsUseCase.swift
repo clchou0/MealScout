@@ -28,7 +28,7 @@ class FetchRestaurantDetailsUseCase {
     
     func fetchTagsFromRestaurant(mapIdentifier: MapIdentifier) -> [CuisineTag] {
         do {
-            if let restaurant = try restaurantRepository.find(by: mapIdentifier) { return restaurant.tags }
+            return try restaurantRepository.getTagsForRestaurant(id: mapIdentifier)
         }
         catch { print("\(error.localizedDescription)") }
         return []

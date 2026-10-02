@@ -19,6 +19,8 @@ class RestaurantSheetViewModel {
     init(mapItem: MKMapItem) {
         self.mapItem = mapItem
         loadReviews()
+        loadTags()
+        print("TAGS: \(self.cuisineTags.count)!!!")
     }
     
     func loadTags() {
@@ -26,7 +28,6 @@ class RestaurantSheetViewModel {
             self.cuisineTags = useCase.fetchTagsFromRestaurant(mapIdentifier: identifier).sorted{ $0.labelName < $1.labelName }
         } else {
             self.cuisineTags = []
-            return
         }
     }
     

@@ -15,6 +15,7 @@ final class CoreDataStack {
     init() {
         // "DataModel" MUST match your .xcdatamodeld file name in Xcode
         persistentContainer = NSPersistentContainer(name: "DataModel")
+        
         persistentContainer.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Failed to load Core Data: \(error)")

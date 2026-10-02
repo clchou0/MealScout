@@ -17,6 +17,7 @@ protocol RestaurantRepository {
     func find(by id: MapIdentifier) throws -> Restaurant?
     
     func findOrCreateRestaurant(id: MapIdentifier, restaurantName: String) throws -> Restaurant
+    func getTagsForRestaurant(id: MapIdentifier) throws -> [CuisineTag]
 }
 
 // @MainActor
@@ -91,6 +92,7 @@ final class CoreDataRestaurantRepository: RestaurantRepository {
     
     func getTagsForRestaurant(id: MapIdentifier) throws -> [CuisineTag] {
         if let restaurant = try find(by: id) {
+            print(restaurant.tags.count)
             return restaurant.tags
         } else { return [] }
     }

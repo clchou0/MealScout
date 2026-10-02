@@ -70,6 +70,6 @@ final class CoreDataReviewRepository: ReviewRepository {
     }
     
     func getReviewsForRestaurant(mapIdentifier: MapIdentifier) throws -> [Review] {
-        return try fetchAll().filter { $0.restaurantId == mapIdentifier }
+        return try fetchAll().filter { $0.restaurant.id == mapIdentifier }
     }
 }

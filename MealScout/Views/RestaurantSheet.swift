@@ -18,10 +18,9 @@ struct RestaurantSheet: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
-                headerArea
-                    .padding()
+                headerSection
                     .background(Color(.systemBackground))
-                
+                tagsBar
                 
                 Divider()
 
@@ -50,9 +49,58 @@ struct RestaurantSheet: View {
             }
             .onAppear {
                 viewModel.loadReviews()
+                viewModel.loadTags()
             }
         }
     }
+    
+    var headerSection: some View {
+        HStack {
+            Text(viewModel.mapItem.name ?? "unknown")
+                .font(serifFont)
+                .foregroundStyle(.gray)
+                .frame(maxWidth: .infinity)
+            VStack {
+                reviewButton
+                openInMapsButton
+            }
+        }
+        .padding()
+    }
+    
+    var reviewButton: some View {
+        Button {
+            print("Tapped Review!!")
+            navigationPath.append(viewModel.mapItem)
+        } label: {
+            HStack {
+                Image(systemName: "pencil")
+                Text("Review")
+                    .fontWeight(.semibold)
+            }
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.roundedRectangle(radius: 10))
+        .disabled(viewModel.mapItem.name == nil || viewModel.mapItem.identifier == nil)
+        .frame(maxWidth: 135)
+    }
+    
+    var openInMapsButton: some View {
+        Button {
+            viewModel.mapItem.openInMaps()
+        } label: {
+            HStack {
+                Image(systemName: "map.fill")
+                Text("In Maps")
+                    .fontWeight(.semibold)
+            }
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.roundedRectangle(radius: 10))
+        .disabled(viewModel.mapItem.name == nil || viewModel.mapItem.identifier == nil)
+        .frame(maxWidth: 135)
+    }
+    
     var headerArea: some View {
         HStack {
             Spacer()
@@ -65,20 +113,16 @@ struct RestaurantSheet: View {
                 print("Tapped Review!!")
                 navigationPath.append(viewModel.mapItem)
             } label: {
-                Text("Review")
-                    .fontWeight(.semibold)
+                HStack {
+                    Image(systemName: "pencil")
+                    Text("Review")
+                        .fontWeight(.semibold)
+                }
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.roundedRectangle(radius: 10))
             .disabled(viewModel.mapItem.name == nil || viewModel.mapItem.identifier == nil)
-        }
-    }
-    
-    var emptyPlaceholder: some View {
-        ContentUnavailableView {
-            Label("No Reviews Yet", systemImage: "fork.knife")
-        } description: {
-            Text("Be the first to review this spot and share your thoughts!!")
+            .padding()
         }
     }
     
@@ -106,6 +150,14 @@ struct RestaurantSheet: View {
                     )
                 }
             }
+        }.padding()
+    }
+    
+    var emptyPlaceholder: some View {
+        ContentUnavailableView {
+            Label("No Reviews Yet", systemImage: "fork.knife")
+        } description: {
+            Text("Be the first to review this spot and share your thoughts!!")
         }
     }
     

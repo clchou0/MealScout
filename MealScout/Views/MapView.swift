@@ -24,7 +24,7 @@ struct MapView: View {
             guard let feature = newValue else { return }
             viewModel.handleChangeFeature(feature: feature)
         }
-        .sheet(isPresented: $viewModel.presentSheet, onDismiss: {
+        .sheet(isPresented: $viewModel.presentRestaurantSheet, onDismiss: {
             viewModel.selectedFeature = nil
         }) {
             if let item = viewModel.mapItem {

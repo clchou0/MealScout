@@ -68,9 +68,6 @@ class LogReviewUseCase {
             // find restaurant by id key, if not found would create one and geyt back to it
             var foundRestaurant = try restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName)
             
-            foundRestaurant.tags += addedRestaurantTags
-            try restaurantRepository.save(foundRestaurant)
-            
             let createdReview = Review(
                 mealOccasion: mealOccasion,
                 dishes: dishes,
@@ -78,8 +75,14 @@ class LogReviewUseCase {
                 totalPrice: totalPrice,
                 ratings: ratings,
                 description: description,
-                restaurantId: foundRestaurant.id
+                restaurant: foundRestaurant
             )
+            try reviewRepository.save(createdReview)
+            
+            foundRestaurant.tags += addedRestaurantTags
+            try restaurantRepository.save(foundRestaurant)
+            print(foundRestaurant.tags.count)
+            
             return .success(("Successfully logged review for \(createdReview.mealOccasion) at \(foundRestaurant.name)"))
         }
         catch {

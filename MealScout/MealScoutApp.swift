@@ -12,7 +12,9 @@ import MapKit
 @main
 struct MealScoutApp: App {
     let persistenceController = PersistenceController.shared
-
+    init() {
+        print("📁 Database Location: \(FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!.path)")
+    }
     var body: some Scene {
         WindowGroup {
 //            ContentView()

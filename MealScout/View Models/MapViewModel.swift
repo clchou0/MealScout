@@ -17,7 +17,7 @@ class MapViewModel {
     ))
     
     var selectedFeature: MapFeature? = nil
-    var presentSheet: Bool = false
+    var presentRestaurantSheet: Bool = false
     var mapItem: MKMapItem? = nil
     
     init() {
@@ -28,7 +28,7 @@ class MapViewModel {
         print("Tapped: \(feature.title ?? "unknown")")
         Task {
             mapItem = await fetchMapItem(for: feature)
-            presentSheet = true
+            presentRestaurantSheet = true
         }
     }
     
