@@ -7,10 +7,15 @@
 
 import SwiftUI
 
+/// Modes:
+///  1. Review: would stack up the options on top of the previous ones:
+///  2. Filter: Would be built from ground up
+
+
 struct TagSelectorView: View {
     let originalSelectedTags: [CuisineTag]
     @Binding var newSelectedTags: [CuisineTag]
-    @Binding var newSelection: CuisineTag?
+    @State var newSelection: CuisineTag?
     @State var currentSelection: CuisineTag? = nil
     
     @State var filter: String = ""
@@ -62,12 +67,22 @@ struct TagSelectorView: View {
                     ForEach(newSelectedTags, id: \.self) { tag in
                         CuisineTagCard(
                             tag: tag,
-                            delegate: { newSelectedTags.removeAll(where: { $0 == tag }) }
+                            delegate: {
+                                newSelectedTags.removeAll(where: { $0 == tag })
+                            }
                         )
                     }
                 }
             }
             .defaultScrollAnchor(.trailing)
+        }
+        .onChange(of: newSelection) {
+            // Add the respective value and clear out selection
+            if let selection = newSelection {
+                print("\(selection.labelName) added")
+                newSelectedTags.append(selection)
+                newSelection = nil
+            }
         }
     }
     
@@ -111,6 +126,5 @@ struct TagSelectorView: View {
 
 #Preview {
     @Previewable @State var sampleTags: [CuisineTag] = []
-    @Previewable @State var samplePending: CuisineTag? = nil
-    TagSelectorView(originalSelectedTags: sampleTags, newSelectedTags: $sampleTags, newSelection: $samplePending)
+    TagSelectorView(originalSelectedTags: sampleTags, newSelectedTags: $sampleTags)
 }

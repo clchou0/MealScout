@@ -102,8 +102,9 @@ struct LogReviewView: View {
                 
                 Section {
                     TagSelectorView(
-                        originalSelectedTags: viewModel.originalTags, newSelectedTags: $viewModel.newRestaurantTags,
-                        newSelection: $viewModel.newSelection)
+                        originalSelectedTags: viewModel.originalTags,
+                        newSelectedTags: $viewModel.newRestaurantTags
+                    )
                 } header: {
                     Text("Extra tags for this restaurant?")
                         .font(serifFont)
@@ -137,14 +138,6 @@ struct LogReviewView: View {
                 }
             }
         }
-        .onChange(of: viewModel.newSelection) {
-            // Add the respective value and clear out selection
-            if let selection = viewModel.newSelection {
-                print("\(selection.labelName) added")
-                viewModel.newRestaurantTags.append(selection)
-                viewModel.newSelection = nil
-            }
-        }
     }
     
     var mealPicker: some View {
@@ -173,12 +166,6 @@ struct LogReviewView: View {
             Spacer()
         }
     }
-    
-    // Users supplement selected restaurant with tags
-    var tagsSeciton: some View {
-        Text("Hi")
-    }
-    
     
     var dealSection: some View {
         let dealBinding = $viewModel.usedDeal

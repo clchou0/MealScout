@@ -27,7 +27,7 @@ enum MealOccasion: Hashable, Codable, CaseIterable {
     }
 }
 
-struct RatingScores: Codable {
+struct RatingScores: Codable, Equatable {
     var quality: Double = 5.0
     var price: Double = 5.0
     var portion: Double = 5.0
