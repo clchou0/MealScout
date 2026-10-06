@@ -17,7 +17,6 @@ struct LogReviewView: View {
             restaurantIdentifier: restaurantIdentifier,
             restaurantName: restaurantName
         )
-        print("Start review...")
     }
     
     var body: some View {

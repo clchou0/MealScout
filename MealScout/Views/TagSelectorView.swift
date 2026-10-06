@@ -101,7 +101,6 @@ struct TagSelectorView: View {
                 // X Button
                 Button {
                     delegate()
-                    print("Pressed delete")
                 } label: {
                     Image(systemName: "xmark")
                         .font(.caption2.bold())

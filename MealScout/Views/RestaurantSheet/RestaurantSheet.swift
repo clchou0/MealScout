@@ -70,7 +70,6 @@ struct RestaurantSheet: View {
     
     var reviewButton: some View {
         Button {
-            print("Tapped Review!!")
             navigationPath.append(viewModel.mapItem)
         } label: {
             HStack {
@@ -110,7 +109,6 @@ struct RestaurantSheet: View {
             Spacer()
             
             Button {
-                print("Tapped Review!!")
                 navigationPath.append(viewModel.mapItem)
             } label: {
                 HStack {

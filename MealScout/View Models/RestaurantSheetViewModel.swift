@@ -20,7 +20,6 @@ class RestaurantSheetViewModel {
         self.mapItem = mapItem
         loadReviews()
         loadTags()
-        print("TAGS: \(self.cuisineTags.count)!!!")
     }
     
     func loadTags() {
@@ -36,7 +35,6 @@ class RestaurantSheetViewModel {
             self.reviews = []
             return
         }
-        print("Loading...")
         self.reviews = useCase.fetchReviewsFromRestaurant(mapIdentifier: identifier)
     }
 }

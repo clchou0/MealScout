@@ -13,16 +13,15 @@ import MapKit
 struct MealScoutApp: App {
     let persistenceController = PersistenceController.shared
     init() {
+        let sharedContext = CoreDataStack.shared.context
+        SeedData.clearData(context: sharedContext)
+        SeedData.seedData(context: sharedContext)
+        
         print("📁 Database Location: \(FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!.path)")
     }
     var body: some Scene {
         WindowGroup {
-//            ContentView()
-//                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-            
             MapView()
-            
-//            LogReviewView(restaurantIdentifier: MKMapItem.Identifier(rawValue: "I7C6B3D9E2F1A4A0B")!, restaurantName: "88 Asean food")
         }
     }
 }

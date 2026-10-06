@@ -9,7 +9,7 @@ import Foundation
 import MapKit
 
 enum MealOccasion: Hashable, Codable, CaseIterable {
-    case breakfast, lunch, dinner, brunch, afternoonTea, snack, supper, dessert, beverage, none
+    case breakfast, lunch, dinner, brunch, afternoonTea, snack, supper, dessert, beverage, drink, none
     // I would define supper as late night meal
     var label: String {
         switch self {
@@ -22,6 +22,7 @@ enum MealOccasion: Hashable, Codable, CaseIterable {
         case .snack: "Snack"
         case .dessert: "Dessert"
         case .beverage: "Beverage"
+        case .drink: "Drink"
         case .none: ""
         }
     }

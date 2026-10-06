@@ -26,8 +26,8 @@ struct FilterObject: Equatable {
     func evaluate (review: Review) -> Bool {
         guard restaurantName.isEmpty || review.restaurant.name.localizedCaseInsensitiveContains(restaurantName) else { return false }
         
-        guard dishName.isEmpty || review.dishes.contains(where: { $0.dishName.localizedCaseInsensitiveContains(dishName)})
-            else { return false }
+        guard dishName.isEmpty || review.dishes.contains(where: { $0.dishName.localizedCaseInsensitiveContains(dishName)
+        }) else { return false }
         
         guard selectedMealTypes.contains(review.mealOccasion) else { return false }
         
@@ -73,7 +73,12 @@ class MapViewModel {
     func handleChangeFeature(feature: MapFeature) {
         print("Tapped: \(feature.title ?? "unknown")")
         Task {
-            mapItem = await fetchMapItem(for: feature)
+            guard let mapItem = await fetchMapItem(for: feature) else {
+                presentRestaurantSheet = false
+                return
+            }
+            self.mapItem = mapItem
+            print("\(mapItem.name ?? "unknown"): \(mapItem.identifier?.rawValue ?? "unknown")")
             presentRestaurantSheet = true
         }
     }
