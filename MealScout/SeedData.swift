@@ -96,13 +96,13 @@ struct SeedData {
                 mealOccasion: .dinner,
                 dishes: [
                     DishEntry(dishName: "Pappardelle Bolognese", price: 34.0, quantity: 2),
-                    DishEntry(dishName: "Burrata", price: 26.0, quantity: 1),
-                    DishEntry(dishName: "Tiramisu", price: 18.0, quantity: 1)
+                    DishEntry(dishName: "Burrata", price: 20.0, quantity: 1),
+                    DishEntry(dishName: "Tiramisu", price: 10.0, quantity: 1)
                 ],
                 numDiners: 2,
-                totalPrice: 185.0,
+                totalPrice: 98.0,
                 ratings: RatingScores(quality: 2.5, price: 1.5, portion: 2.0),
-                description: "Extremely overrated and overpriced for what it is. Pasta was lukewarm and under-seasoned, service was rushed, and $185 for two people left us starving. You pay purely for the scene.",
+                description: "Extremely overrated and overpriced for what it is. Pasta was lukewarm and under-seasoned, service was rushed, and $98 for two people left us starving. You pay purely for the scene.",
                 usedDeal: nil
             ),
             reviewData(

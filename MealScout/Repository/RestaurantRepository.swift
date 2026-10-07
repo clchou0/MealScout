@@ -92,7 +92,6 @@ final class CoreDataRestaurantRepository: RestaurantRepository {
     
     func getTagsForRestaurant(id: MapIdentifier) throws -> [CuisineTag] {
         if let restaurant = try find(by: id) {
-            print(restaurant.tags.count)
             return restaurant.tags
         } else { return [] }
     }

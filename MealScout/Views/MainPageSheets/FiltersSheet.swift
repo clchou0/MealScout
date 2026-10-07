@@ -33,16 +33,16 @@ struct FiltersSheet: View {
                 HStack {
                     Text("Target max price per person: ")
                     Spacer()
-                    Text(",$")
+                    Text("$")
                     TextField("", value: Binding<Double?>(
                         get: { filter.desiredPricePP.isFinite ? filter.desiredPricePP : nil },
-                            set: {
-                                if let v = $0, v > 0 {
-                                    filter.desiredPricePP = (v * 100).rounded() / 100
-                                } else {
-                                    filter.desiredPricePP = .infinity
-                                }
+                        set: {
+                            if let v = $0, v > 0 {
+                                filter.desiredPricePP = (v * 100).rounded() / 100
+                            } else {
+                                filter.desiredPricePP = .infinity
                             }
+                        }
                     ), format: .number)
                     .frame(maxWidth: 100)
                     .textFieldStyle(.roundedBorder)
@@ -58,9 +58,12 @@ struct FiltersSheet: View {
                 Text("Tags: ").font(serifFont)
             }
             
-    
+            
             Section {
                 Picker("", selection: $newMealType) {
+                    Text("Select a tag...").dimText().font(.system(size: 20))
+                        .tag(MealOccasion?.none)
+                             
                     ForEach(MealOccasion.allCases, id: \.self) { occasion in
                         if (filter.selectedMealTypes.contains(occasion)) {
                             Text(occasion.label).tag(occasion)
@@ -70,6 +73,11 @@ struct FiltersSheet: View {
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
                 }
+                if (filter.selectedMealTypes.isEmpty) { Text("Any").dimText() }
+                ForEach (filter.selectedMealTypes, id: \.self) { meal in
+                    Text(meal.label)
+                }
+                
                 .pickerStyle(.menu)
             } header: {
                 Text("Target Meals: ").font(serifFont)
@@ -84,6 +92,14 @@ struct FiltersSheet: View {
             }
             
         }.padding()
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+        .onChange(of: newMealType) { _, newValue in
+            if let newMeal = newValue {
+                filter.selectedMealTypes.append(newMeal)
+            }
+        }
     }
 }
 

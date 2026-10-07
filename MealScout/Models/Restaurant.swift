@@ -10,7 +10,7 @@ import MapKit
 
 typealias MapIdentifier = MKMapItem.Identifier
 
-struct Restaurant: Identifiable, Codable {
+struct Restaurant: Identifiable, Codable, Equatable {
     let id: MapIdentifier
     var name: String
     var tags: [CuisineTag]

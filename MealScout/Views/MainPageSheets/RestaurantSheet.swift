@@ -162,9 +162,9 @@ struct RestaurantSheet: View {
     var reviewsSection: some View {
         ForEach(viewModel.reviews) { review in
             NavigationLink {
-                Text(review.writtenDate.formatted(date: .long, time: .shortened))
+                ReviewFullView(review: review)
             } label: {
-                Text(review.writtenDate.formatted(date: .abbreviated, time: .omitted))
+                ReviewCard(review: review)
             }
         }
     }

@@ -9,48 +9,6 @@ import Foundation
 import MapKit
 import SwiftUI
 
-struct FilterObject: Equatable {
-    var restaurantName: String = ""
-    var dishName: String = ""
-    
-    var oneDinerRestrict: Bool = false
-    var desiredPricePP: Double = .infinity
-    var selectedMealTypes: [MealOccasion] = MealOccasion.AllCases()
-    
-    var selectedCuisineTags: [CuisineTag] = []
-    var newSelectedTag: CuisineTag? = nil
-    
-    var desiredRating: RatingScores = RatingScores(quality: 1.0, price: 1.0, portion: 1.0)
-    
-    
-    func evaluate (review: Review) -> Bool {
-        guard restaurantName.isEmpty || review.restaurant.name.localizedCaseInsensitiveContains(restaurantName) else { return false }
-        
-        guard dishName.isEmpty || review.dishes.contains(where: { $0.dishName.localizedCaseInsensitiveContains(dishName)
-        }) else { return false }
-        
-        guard selectedMealTypes.contains(review.mealOccasion) else { return false }
-        
-        if oneDinerRestrict {
-            guard review.numDiners == 1 else { return false }
-        }
-        
-        guard desiredPricePP >= (review.totalPrice / Double(review.numDiners)) else { return false }
-        
-        guard review.restaurant.tags.contains(where: { selectedCuisineTags.contains($0) })
-            else { return false }
-        
-        let rate = review.ratings
-        guard rate.quality >= desiredRating.quality
-                && rate.portion >= desiredRating.portion
-                && rate.price >= desiredRating.price else { return false }
-        
-        return true
-    }
-    
-    var isDefault: Bool { self == FilterObject() }
-}
-
 @Observable
 class MapViewModel {
     var position: MapCameraPosition = MapCameraPosition.region(MKCoordinateRegion(
@@ -65,6 +23,10 @@ class MapViewModel {
     
     var mapItem: MKMapItem? = nil
     var filter = FilterObject()
+    let useCase = FilterReviewsUseCase()
+    var filteredRestaurants: [Restaurant] = []
+    var allReviews: [Review] = []
+    var alertItem: AlertItem? = nil
     
     init() {
         
@@ -73,23 +35,75 @@ class MapViewModel {
     func handleChangeFeature(feature: MapFeature) {
         print("Tapped: \(feature.title ?? "unknown")")
         Task {
-            guard let mapItem = await fetchMapItem(for: feature) else {
+            guard let mapItem = await FetchMapItem.getByFeature(for: feature) else {
                 presentRestaurantSheet = false
                 return
             }
             self.mapItem = mapItem
-            print("\(mapItem.name ?? "unknown"): \(mapItem.identifier?.rawValue ?? "unknown")")
-            presentRestaurantSheet = true
         }
     }
     
-    func fetchMapItem(for feature: MapFeature) async -> MKMapItem? {
-        let request = MKMapItemRequest(feature: feature)
+    func handleChangeMapItem(mapItem: MKMapItem) {
+        print("\(mapItem.name ?? "unknown"): \(mapItem.identifier?.rawValue ?? "unknown")")
+        presentRestaurantSheet = true
+    }
+    
+    func reloadAllReviews() {
         do {
-            return try await request.mapItem
+            try allReviews = useCase.fetchAllReviews()
         } catch {
-            print("Failed to get map item: \(error.localizedDescription)")
-            return nil
+            print(error)
         }
+    }
+    
+    func reloadFilteredRestaurants() {
+        let result = useCase.execute(allReviews: allReviews, filter: filter)
+        switch result {
+            case .success(let restaurants): filteredRestaurants = restaurants
+            case .failure(let error): print(error)
+        }
+    }
+    
+    func goToRestaurant(id: MapIdentifier) {
+        Task {
+            if let restaurantItem = await FetchMapItem.getByString(from: id.rawValue) {
+                mapItem = restaurantItem
+                presentResultsSheet = false
+            }
+        }
+    }
+    
+    func checkForSharedPlace() async {
+        print("CHECKING")
+        guard let id = UserDefaults(suiteName: "group.MealScout")?.string(forKey: "shared_place_id") else {
+            print("not found")
+            return
+        }
+        UserDefaults(suiteName: "group.MealScout")?.removeObject(forKey: "shared_place_id")
+        print("APP GOT: \(id)" )
+        
+        Task {
+            if let item = await FetchMapItem.getByString(from: id) {
+                print("GOT ITEM!!: \(item.name ?? "Unknown")")
+                guard let category = item.pointOfInterestCategory else {
+                    print("NO CATEGORY!!")
+                    alertItem = AlertItem(
+                        title: "Category invalid",
+                        message: "\(item.name ?? "Unknown place") does not have a valid category"
+                    )
+                    return
+                }
+                guard FetchMapItem.foodCategories.contains(category) else {
+                    print("WOORNG CATEGORY!")
+                    alertItem = AlertItem(
+                        title: "Category invalid",
+                        message: "\(item.name ?? "Unknown place") is not a restaurant"
+                    )
+                    return
+                }
+                self.mapItem = item
+            }
+        }
+        
     }
 }

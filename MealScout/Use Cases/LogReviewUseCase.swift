@@ -81,7 +81,6 @@ class LogReviewUseCase {
             
             foundRestaurant.tags += addedRestaurantTags
             try restaurantRepository.save(foundRestaurant)
-            print(foundRestaurant.tags.count)
             
             return .success(("Successfully logged review for \(createdReview.mealOccasion) at \(foundRestaurant.name)"))
         }

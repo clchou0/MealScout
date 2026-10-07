@@ -14,7 +14,7 @@ struct MealScoutApp: App {
     let persistenceController = PersistenceController.shared
     init() {
         let sharedContext = CoreDataStack.shared.context
-        SeedData.clearData(context: sharedContext)
+        // SeedData.clearData(context: sharedContext)
         SeedData.seedData(context: sharedContext)
         
         print("📁 Database Location: \(FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!.path)")

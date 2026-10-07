@@ -7,10 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		20A77BAF3075FB72008F284D /* AppleMapsShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 20A77BA53075FB71008F284D /* AppleMapsShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		20C2A69F306A15C500F9AE76 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 20C2A69D306A15C500F9AE76 /* DataModel.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		20A77BAD3075FB72008F284D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 20C2A5C13062A9A000F9AE76 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 20A77BA43075FB71008F284D;
+			remoteInfo = AppleMapsShare;
+		};
 		20C2A5DC3062A9A200F9AE76 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 20C2A5C13062A9A000F9AE76 /* Project object */;
@@ -27,16 +35,59 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		20A77BB43075FB72008F284D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				20A77BAF3075FB72008F284D /* AppleMapsShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		20A77BA53075FB71008F284D /* AppleMapsShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AppleMapsShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		20C2A5C93062A9A000F9AE76 /* MealScout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MealScout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		20C2A5DB3062A9A200F9AE76 /* MealScoutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MealScoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20C2A5E53062A9A200F9AE76 /* MealScoutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MealScoutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20C2A69E306A15C500F9AE76 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		20A77BB03075FB72008F284D /* Exceptions for "AppleMapsShare" folder in "AppleMapsShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 20A77BA43075FB71008F284D /* AppleMapsShare */;
+		};
+		20A77BB73075FE70008F284D /* Exceptions for "MealScout" folder in "MealScout" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 20C2A5C83062A9A000F9AE76 /* MealScout */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		20A77BA63075FB71008F284D /* AppleMapsShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				20A77BB03075FB72008F284D /* Exceptions for "AppleMapsShare" folder in "AppleMapsShare" target */,
+			);
+			path = AppleMapsShare;
+			sourceTree = "<group>";
+		};
 		20C2A5CB3062A9A000F9AE76 /* MealScout */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				20A77BB73075FE70008F284D /* Exceptions for "MealScout" folder in "MealScout" target */,
+			);
 			path = MealScout;
 			sourceTree = "<group>";
 		};
@@ -53,6 +104,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		20A77BA23075FB71008F284D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		20C2A5C63062A9A000F9AE76 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -84,6 +142,7 @@
 				20C2A5CB3062A9A000F9AE76 /* MealScout */,
 				20C2A5DE3062A9A200F9AE76 /* MealScoutTests */,
 				20C2A5E83062A9A200F9AE76 /* MealScoutUITests */,
+				20A77BA63075FB71008F284D /* AppleMapsShare */,
 				20C2A5CA3062A9A000F9AE76 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,6 +153,7 @@
 				20C2A5C93062A9A000F9AE76 /* MealScout.app */,
 				20C2A5DB3062A9A200F9AE76 /* MealScoutTests.xctest */,
 				20C2A5E53062A9A200F9AE76 /* MealScoutUITests.xctest */,
+				20A77BA53075FB71008F284D /* AppleMapsShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -101,6 +161,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		20A77BA43075FB71008F284D /* AppleMapsShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 20A77BB13075FB72008F284D /* Build configuration list for PBXNativeTarget "AppleMapsShare" */;
+			buildPhases = (
+				20A77BA13075FB71008F284D /* Sources */,
+				20A77BA23075FB71008F284D /* Frameworks */,
+				20A77BA33075FB71008F284D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				20A77BA63075FB71008F284D /* AppleMapsShare */,
+			);
+			name = AppleMapsShare;
+			packageProductDependencies = (
+			);
+			productName = AppleMapsShare;
+			productReference = 20A77BA53075FB71008F284D /* AppleMapsShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		20C2A5C83062A9A000F9AE76 /* MealScout */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 20C2A5EF3062A9A200F9AE76 /* Build configuration list for PBXNativeTarget "MealScout" */;
@@ -108,10 +190,12 @@
 				20C2A5C53062A9A000F9AE76 /* Sources */,
 				20C2A5C63062A9A000F9AE76 /* Frameworks */,
 				20C2A5C73062A9A000F9AE76 /* Resources */,
+				20A77BB43075FB72008F284D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				20A77BAE3075FB72008F284D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				20C2A5CB3062A9A000F9AE76 /* MealScout */,
@@ -179,6 +263,9 @@
 				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
+					20A77BA43075FB71008F284D = {
+						CreatedOnToolsVersion = 26.6;
+					};
 					20C2A5C83062A9A000F9AE76 = {
 						CreatedOnToolsVersion = 26.6;
 					};
@@ -209,11 +296,19 @@
 				20C2A5C83062A9A000F9AE76 /* MealScout */,
 				20C2A5DA3062A9A200F9AE76 /* MealScoutTests */,
 				20C2A5E43062A9A200F9AE76 /* MealScoutUITests */,
+				20A77BA43075FB71008F284D /* AppleMapsShare */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		20A77BA33075FB71008F284D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		20C2A5C73062A9A000F9AE76 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -238,6 +333,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		20A77BA13075FB71008F284D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		20C2A5C53062A9A000F9AE76 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -263,6 +365,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		20A77BAE3075FB72008F284D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 20A77BA43075FB71008F284D /* AppleMapsShare */;
+			targetProxy = 20A77BAD3075FB72008F284D /* PBXContainerItemProxy */;
+		};
 		20C2A5DD3062A9A200F9AE76 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 20C2A5C83062A9A000F9AE76 /* MealScout */;
@@ -276,6 +383,63 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		20A77BB23075FB72008F284D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AppleMapsShare/AppleMapsShareDebug.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 33779RSHDR;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AppleMapsShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AppleMapsShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = MealScout.MealScout.AppleMapsShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		20A77BB33075FB72008F284D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 33779RSHDR;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AppleMapsShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AppleMapsShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = MealScout.MealScout.AppleMapsShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		20C2A5ED3062A9A200F9AE76 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -400,11 +564,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MealScout/MealScoutDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 33779RSHDR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MealScout/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -437,6 +603,7 @@
 				DEVELOPMENT_TEAM = 33779RSHDR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MealScout/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -542,6 +709,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		20A77BB13075FB72008F284D /* Build configuration list for PBXNativeTarget "AppleMapsShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20A77BB23075FB72008F284D /* Debug */,
+				20A77BB33075FB72008F284D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		20C2A5C43062A9A000F9AE76 /* Build configuration list for PBXProject "MealScout" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
