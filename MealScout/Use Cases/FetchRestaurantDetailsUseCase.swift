@@ -7,28 +7,30 @@
 
 import Foundation
 
+/// Fetches necessary details for a restaurant
+
 class FetchRestaurantDetailsUseCase {
     private let reviewRepository: ReviewRepository
     private let restaurantRepository: RestaurantRepository
     
-    init(reviewRepository: ReviewRepository = CoreDataReviewRepository(),
-         restaurantRepository: RestaurantRepository = CoreDataRestaurantRepository()) {
+    init(reviewRepository: ReviewRepository = FirebaseReviewRepository(),
+         restaurantRepository: RestaurantRepository = FirebaseRestaurantRepository()) {
         self.reviewRepository = reviewRepository
         self.restaurantRepository = restaurantRepository
     }
     
-    func fetchReviewsFromRestaurant(mapIdentifier: MapIdentifier) -> [Review] {
+    func fetchReviewsFromRestaurant(mapIdentifier: MapIdentifier) async -> [Review] {
         do {
-            return try reviewRepository.getReviewsForRestaurant(mapIdentifier: mapIdentifier)
+            return try await reviewRepository.getReviewsForRestaurant(mapIdentifier: mapIdentifier)
         } catch {
             print("\(error.localizedDescription)")
         }
         return []
     }
     
-    func fetchTagsFromRestaurant(mapIdentifier: MapIdentifier) -> [CuisineTag] {
+    func fetchTagsFromRestaurant(mapIdentifier: MapIdentifier) async -> [CuisineTag] {
         do {
-            return try restaurantRepository.getTagsForRestaurant(id: mapIdentifier)
+            return try await restaurantRepository.getTagsForRestaurant(id: mapIdentifier)
         }
         catch { print("\(error.localizedDescription)") }
         return []

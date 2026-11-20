@@ -14,6 +14,12 @@ struct AlertItem: Identifiable {
     let message: String
     var delegate: () -> Void = { return }
     var cancelDelegate: (() -> Void)? = nil
+    
+    var okLabel: String? = nil
+    var cancelLabel: String? = nil
+    
+    var button3Delegate: (() -> Void)? = nil
+    var button3Label: String = ""
 }
 
 ///
@@ -37,14 +43,21 @@ struct AlertItemModifier: ViewModifier {
             presenting: alertItem
         ) { item in
             HStack {
-                Button("OK") {
+                Button("\(item.okLabel ?? "OK")") {
                     item.delegate()
                     alertItem = nil
                 }
                 
                 if (item.cancelDelegate != nil) {
-                    Button("Cancel") {
+                    Button("\(item.cancelLabel ?? "Cancel")") {
                         item.cancelDelegate!()
+                        alertItem = nil
+                    }
+                }
+                
+                if (item.button3Delegate != nil) {
+                    Button(item.button3Label) {
+                        item.button3Delegate!()
                         alertItem = nil
                     }
                 }

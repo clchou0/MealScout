@@ -20,6 +20,9 @@ struct TagSelectorView: View {
     
     @State var filter: String = ""
     
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    
     private var filteredTags: [CuisineTag] {
         CuisineTag.allCases.filter { tag in
             let wasNotSelected = !originalSelectedTags.contains(tag)
@@ -32,7 +35,7 @@ struct TagSelectorView: View {
     
     var body: some View {
         VStack {
-            TextField("", text: $filter).textFieldStyle(.roundedBorder)
+            TextField("Search a tag...", text: $filter).textFieldStyle(.roundedBorder)
             
             HStack {
                 Picker("", selection: $currentSelection) {
@@ -62,19 +65,21 @@ struct TagSelectorView: View {
                 .foregroundStyle(.blue)
                 .disabled(currentSelection == nil)
             }
-            ScrollView (.horizontal) {
-                HStack (spacing: 5) {
-                    ForEach(newSelectedTags, id: \.self) { tag in
-                        CuisineTagCard(
-                            tag: tag,
-                            delegate: {
-                                newSelectedTags.removeAll(where: { $0 == tag })
-                            }
-                        )
-                    }
+            
+            VStack(spacing: 5) {
+                ForEach(newSelectedTags, id: \.self) { tag in
+                    CuisineTagCard(
+                        tag: tag,
+                        delegate: {newSelectedTags.removeAll {$0 == tag}}
+                    )
+                    .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: 0.96)))
                 }
             }
-            .defaultScrollAnchor(.trailing)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.top, 5)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: newSelectedTags)
+            .sensoryFeedback(.selection, trigger: newSelectedTags.count)
+            
         }
         .onChange(of: newSelection) {
             // Add the respective value and clear out selection
@@ -97,7 +102,7 @@ struct TagSelectorView: View {
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
                     .lineLimit(1)
-
+                
                 // X Button
                 Button {
                     delegate()

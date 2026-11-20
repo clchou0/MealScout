@@ -6,8 +6,12 @@
 //
 
 import Foundation
+import FirebaseAuth
+
+/// Logging reviews that 
 
 enum LogReviewError: Equatable, LocalizedError {
+    case authenticationRequired
     case invalidMealOccasion
     case dishesEmpty
     case invalidDish
@@ -20,6 +24,7 @@ enum LogReviewError: Equatable, LocalizedError {
     
     var errorDescription: String? {
         switch self {
+        case .authenticationRequired: "Please log in before submitting a review"
         case .invalidMealOccasion: "Please enter when you had the meal"
         case .dishesEmpty: "Please enter at least one dish you had for the meal"
         case .invalidDish: "Please enter corect details for the dishes"
@@ -36,11 +41,14 @@ enum LogReviewError: Equatable, LocalizedError {
 class LogReviewUseCase {
     private let reviewRepository: ReviewRepository
     private let restaurantRepository: RestaurantRepository
+    private let currentUserID: () -> String?
     
-    init(reviewRepository: ReviewRepository = CoreDataReviewRepository(),
-         restaurantRepository: RestaurantRepository = CoreDataRestaurantRepository()) {
+    init(reviewRepository: ReviewRepository = FirebaseReviewRepository(),
+         restaurantRepository: RestaurantRepository = FirebaseRestaurantRepository(),
+         currentUserID: @escaping () -> String? = { Auth.auth().currentUser?.uid }) {
         self.reviewRepository = reviewRepository
         self.restaurantRepository = restaurantRepository
+        self.currentUserID = currentUserID
     }
     
     func execute(
@@ -53,8 +61,11 @@ class LogReviewUseCase {
         usedDeal: Deal,
         restaurantIdentifier: MapIdentifier,
         restaurantName: String,
-        addedRestaurantTags: [CuisineTag]
-    ) -> Result<String, LogReviewError> {
+        addedRestaurantTags: [CuisineTag],
+        lat: Double,
+        lng: Double
+    ) async -> Result<String, LogReviewError> {
+        guard let authorID = currentUserID() else { return .failure(.authenticationRequired) }
         guard mealOccasion != .none else { return .failure(.invalidMealOccasion) }
         guard numDiners > 0 else { return .failure(.invalidDiners) }
         guard !dishes.isEmpty else { return .failure(.dishesEmpty) }
@@ -66,21 +77,22 @@ class LogReviewUseCase {
 
         do {
             // find restaurant by id key, if not found would create one and geyt back to it
-            var foundRestaurant = try restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName)
+            var foundRestaurant = try await restaurantRepository.findOrCreateRestaurant(id: restaurantIdentifier, restaurantName: restaurantName, lat: lat, lng: lng)
+            // Unique tags to ensure nothing comes in multiple times
+            foundRestaurant.tags = Array(Set(foundRestaurant.tags + addedRestaurantTags))
             
             let createdReview = Review(
+                authorID: authorID,
                 mealOccasion: mealOccasion,
                 dishes: dishes,
                 numDiners: numDiners,
                 totalPrice: totalPrice,
                 ratings: ratings,
                 description: description,
+                usedDeal: usedDeal,
                 restaurant: foundRestaurant
             )
-            try reviewRepository.save(createdReview)
-            
-            foundRestaurant.tags += addedRestaurantTags
-            try restaurantRepository.save(foundRestaurant)
+            try await reviewRepository.save(createdReview, with: foundRestaurant)
             
             return .success(("Successfully logged review for \(createdReview.mealOccasion) at \(foundRestaurant.name)"))
         }
@@ -89,9 +101,9 @@ class LogReviewUseCase {
         }
     }
     
-    func retrieveTagsForRestaurant(mapIdentifier: MapIdentifier) -> [CuisineTag] {
+    func retrieveTagsForRestaurant(mapIdentifier: MapIdentifier) async -> [CuisineTag] {
         do {
-            guard let restaurant = try restaurantRepository.find(by: mapIdentifier) else { return [] }
+            guard let restaurant = try await restaurantRepository.find(by: mapIdentifier) else { return [] }
             return restaurant.tags
         } catch { return [] }
     }

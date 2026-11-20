@@ -11,6 +11,8 @@ import Foundation
 class LogReviewViewModel {
     let restaurantIdentifier: MapIdentifier
     let restaurantName: String
+    let lat: Double
+    let lng: Double
     
     var mealOccasion: MealOccasion = .none
     var dishes: [DishEntry] = []
@@ -23,7 +25,7 @@ class LogReviewViewModel {
     var totalPrice: Double = 0
     
     var newRestaurantTags: [CuisineTag] = []
-    var originalTags: [CuisineTag]
+    var originalTags: [CuisineTag] = []
     
     var newSelection: CuisineTag? = nil
     
@@ -34,16 +36,23 @@ class LogReviewViewModel {
     
     var alertItem: AlertItem? = nil
     let useCase: LogReviewUseCase = LogReviewUseCase()
+    var successFeedback = 0
+    var errorFeedback = 0
     
-    init(restaurantIdentifier: MapIdentifier, restaurantName: String) {
+    init(restaurantIdentifier: MapIdentifier, restaurantName: String, lat: Double, lng: Double) {
         self.restaurantIdentifier = restaurantIdentifier
         self.restaurantName = restaurantName
+        self.lat = lat
+        self.lng = lng
         
-        self.originalTags = useCase.retrieveTagsForRestaurant(mapIdentifier: restaurantIdentifier)
+        Task {
+            self.originalTags = await useCase.retrieveTagsForRestaurant(mapIdentifier: restaurantIdentifier)
+        }
     }
     
-    func submitReview(dismiss: @escaping () -> Void) {
-        let result = useCase.execute(
+    @MainActor
+    func submitReview(dismiss: @escaping () -> Void) async {
+        let result = await useCase.execute(
             mealOccasion: mealOccasion,
             dishes: dishes, numDiners: numDiners,
             totalPrice: displayedTotalPrice,
@@ -52,13 +61,19 @@ class LogReviewViewModel {
             usedDeal: usedDeal,
             restaurantIdentifier: restaurantIdentifier,
             restaurantName: restaurantName,
-            addedRestaurantTags: newRestaurantTags
+            addedRestaurantTags: newRestaurantTags,
+            lat: lat,
+            lng: lng
         )
         
         switch (result) {
         case .failure(let error):
-            alertItem = AlertItem(title: "Error", message: error.errorDescription ?? "Unknown...")
+//            alertItem = AlertItem(title: "Error", message: error.errorDescription ?? "Unknown...")
+            errorFeedback += 1
+            alertItem = AlertItem(title: "Error", message: error.errorDescription ?? "Please try again.")
         case .success(let message):
+//            alertItem = AlertItem(title: "Success", message: message, delegate: { dismiss() })
+            successFeedback += 1
             alertItem = AlertItem(title: "Success", message: message, delegate: { dismiss() })
         }
     }

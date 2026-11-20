@@ -8,7 +8,9 @@
 import Foundation
 import MapKit
 
-enum MealOccasion: Hashable, Codable, CaseIterable {
+/// A review object that has all details related to a meal
+
+enum MealOccasion: String, Hashable, Codable, CaseIterable {
     case breakfast, lunch, dinner, brunch, afternoonTea, snack, supper, dessert, beverage, drink, none
     // I would define supper as late night meal
     var label: String {
@@ -45,8 +47,11 @@ struct Deal: Codable {
     }
     
     var isValid: Bool {
-        if (isEmpty) { return isEmpty }
-        return !redeemSource.isEmpty && (percentOff >= 0 || dollarsOff >= 0.0)    // Fill both discount and source
+        if isEmpty { return true }
+        // Needs a source; each discount must be valid on its own, both can be filled in
+        return !redeemSource.isEmpty
+            && (0...100).contains(percentOff)
+            && dollarsOff >= 0.0
     }
 }
 
@@ -63,6 +68,10 @@ struct DishEntry: Identifiable, Codable {
 
 struct Review: Identifiable, Codable {
     let id: UUID
+    var authorID: String
+    let restaurantID: String
+    var isSample: Bool
+    
     var mealOccasion: MealOccasion
     var writtenDate: Date
     
@@ -78,8 +87,11 @@ struct Review: Identifiable, Codable {
     
     let restaurant: Restaurant
     
-    init(mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurant: Restaurant) {
-        self.id = UUID()
+    init(id: UUID = UUID(), authorID: String = "", isSample: Bool = false, mealOccasion: MealOccasion, dishes: [DishEntry], numDiners: Int, totalPrice: Double, ratings: RatingScores, description: String, usedDeal: Deal? = nil, restaurant: Restaurant) {
+        self.id = id
+        self.authorID = authorID
+        self.restaurantID = restaurant.id.rawValue
+        self.isSample = isSample
         self.mealOccasion = mealOccasion
         self.writtenDate = .now
         self.dishes = dishes

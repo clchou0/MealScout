@@ -7,158 +7,380 @@
 
 import SwiftUI
 import MapKit
+import UIKit
 
 struct MapView: View {
+    @State private var session = AccountSession()
+    @State private var showAccount = false
     @State var viewModel: MapViewModel = MapViewModel()
     @State var mapItems: [String: MKMapItem] = [:]
     @Environment(\.scenePhase) private var scenePhase
+    @State var locationManager: MapLocationViewModel = MapLocationViewModel()
+    @State var visibleMeters: Double = 0
+    
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var appearanceSnapshot: UIView?
+    
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     
     var body: some View {
-        mapComponent
-        .overlay(alignment: .bottom) {
-            buttonsSection.offset(x: 0, y: -80)
+        ZStack {
+            mapComponent
+                .overlay(alignment: .bottom) {
+                    operationsButtonsSection.offset(x: 0, y: -80)
+                }
+            
+            HStack {
+                VStack {
+                    HStack {
+                        accountsToolBar
+                        Spacer()
+                    }
+                    .padding(.leading, 16)
+                    Spacer()
+                }
+            }
+            
+            HStack {
+                Spacer()
+                VStack {
+                    mapButtonsSection
+                    Spacer()
+                }
+            }
+            .padding(.top, 80)
+            .padding(.trailing, 16)
+        }
+        .overlay(alignment: .topTrailing) {
+            Button { changeAppearance() } label: {
+                Image(systemName: isDarkMode ? "sun.max.fill" : "moon.fill")
+                    .foregroundStyle(.primary)
+                    .frame(width: 44, height: 44)
+                    .background(.regularMaterial, in: Circle())
+                    .contentTransition(UIAccessibility.isReduceMotionEnabled ? .identity : .symbolEffect(.replace))
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 80)
+        }
+        .onChange(of: colorScheme) { _, _ in
+            if let snapshot = appearanceSnapshot {
+                DispatchQueue.main.async {
+                    UIView.animate(withDuration: 0.35) {
+                        snapshot.alpha = 0
+                    } completion: { _ in
+                        snapshot.removeFromSuperview()
+                        appearanceSnapshot = nil
+                    }
+                }
+            }
+        }
+        
+        .environment(session)
+        .sheet(isPresented: $showAccount) {
+            AccountView().environment(session)
         }
         .sheet(isPresented: $viewModel.presentRestaurantSheet, onDismiss: {
             viewModel.selectedFeature = nil
+            viewModel.mapItem = nil
+            Task {
+                await viewModel.reloadFilteredRestaurants()
+            }
         }) {
             if let item = viewModel.mapItem {
-                RestaurantSheet(mapItem: item)
+                RestaurantSheet(mapItem: item, targetLocation: viewModel.targetLocationCoordinate)
+                    .environment(session)
                     .cornerRadius(0)
                     .presentationDetents([.large])
             }
         }
         .onAppear() {
-            viewModel.reloadAllReviews()
-            print("Reviews: \(viewModel.allReviews.count)")
-            viewModel.reloadFilteredRestaurants()
-            Task { await viewModel.checkForSharedPlace() }
+            Task {
+                await viewModel.checkForSharedPlace()
+                await viewModel.loadFirebaseData()
+            }
+            locationManager.requestPermissionAccess(
+                onAuthorize: {
+                    viewModel.cameraPosition = .userLocation(fallback: .automatic)
+                    
+                    if let coord = locationManager.currentCoordinate {
+                        viewModel.targetLocationCoordinate = coord
+                    }
+                },
+                onUnauthorized: { _ in}
+            )
         }
         .onChange(of: scenePhase) { _, phase in
             Task {
                 if phase == .active { await viewModel.checkForSharedPlace() }
             }
         }
-        
-        .sheet(isPresented: $viewModel.presentFilterSheet) {
-            FiltersSheet(filter: $viewModel.filter)
-        }
-        .onChange(of: viewModel.presentFilterSheet) { _, newValue in
-            // Detect if the filter sheet has been collapsed
-            if !newValue {
-                viewModel.reloadFilteredRestaurants()
-                print("restaurants loaded: \(viewModel.filteredRestaurants.count)")
+        .onChange(of: viewModel.targetLocationCoordinate) { _, _ in
+            Task {
+                await viewModel.reloadFilteredRestaurants()
             }
         }
-        .sheet(isPresented: $viewModel.presentResultsSheet) {
+        .sheet(isPresented: $viewModel.presentFilterSheet, onDismiss: {
+            Task { await viewModel.reloadFilteredRestaurants() }
+        }) {
+            FiltersSheet(filter: $viewModel.filter)
+        }
+        .sheet(isPresented: $viewModel.presentResultsSheet, onDismiss: {
+            Task { await viewModel.reloadFilteredRestaurants() }
+        }) {
             FilterResultsSheet(delegate: { id in
                 viewModel.goToRestaurant(id: id)
             },
-            filteredRestaurants: viewModel.filteredRestaurants)
+                               filteredRestaurants: viewModel.filteredRestaurants)
         }
         .resultAlert(alertItem: $viewModel.alertItem)
     }
     
+    @MainActor
+    private func changeAppearance() {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
+
+        if !UIAccessibility.isReduceMotionEnabled,
+           let window,
+           let snapshot = window.snapshotView(afterScreenUpdates: false) {
+            snapshot.frame = window.bounds
+            window.addSubview(snapshot)
+            appearanceSnapshot = snapshot
+        }
+
+        isDarkMode.toggle()
+    }
+    
     var mapComponent: some View {
-        Map(position: $viewModel.position, selection: $viewModel.selectedFeature) {
-            UserAnnotation()
-            
-            ForEach(viewModel.filteredRestaurants) { restaurant in
-                if let item = mapItems[restaurant.id.rawValue] {
-                    let coord = item.location.coordinate
-                    
-                    Annotation(restaurant.name, coordinate: coord, anchor: .bottom) {
-                        VStack(spacing: 0) {
-                            // Pin Head (Bubble)
-                            ZStack {
-                                Circle()
-                                    .fill(.purple)
-                                    .frame(width: 20, height: 20)
-                                
-                                Image(systemName: "star.fill")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(.white)
-                            }
-                            
-                            // Pin Pointer (Needle Tip)
-                            Image(systemName: "triangle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 8, height: 6)
-                                .foregroundStyle(.purple)
-                                .rotationEffect(.degrees(180))
-                                .offset(y: -1) // Closes seam with circle
-                            
-                            // Ground Shadow
-                            Ellipse()
-                                .fill(.black.opacity(0.2))
-                                .frame(width: 14, height: 4)
-                                .offset(y: 1)
-                        }
-                        .onTapGesture {
-                            viewModel.mapItem = item
+        MapReader { proxy in
+            Map(position: $viewModel.cameraPosition, selection: $viewModel.selectedFeature) {
+                UserAnnotation()
+                
+                ForEach(viewModel.filteredRestaurants) { restaurant in
+                    if let item = mapItems[restaurant.id.rawValue] {
+                        Annotation(restaurant.name, coordinate: item.location.coordinate, anchor: .bottom) {
+                            RestaurantPin()
+                                .onTapGesture {
+                                    viewModel.mapItem = item
+                                }
                         }
                     }
                 }
+                Annotation("", coordinate: viewModel.targetLocationCoordinate) {
+                    TargetPin()
+                }
             }
-        }
-        .mapStyle(.standard(pointsOfInterest: .including([.restaurant])))
-        .mapControls {
-            MapUserLocationButton()
-        }
-        .onChange(of: viewModel.selectedFeature) { _, newValue in
-            guard let feature = newValue else { return }
-            
-            guard let category = feature.pointOfInterestCategory else { return }
-            guard FetchMapItem.foodCategories.contains(category) else { return }
-            viewModel.handleChangeFeature(feature: feature)
-        }
-        .onChange(of: viewModel.mapItem) { _, newValue in
-            if let newItem = newValue {
-                viewModel.handleChangeMapItem(mapItem: newItem)
+            .mapStyle(.standard(pointsOfInterest: .including([.restaurant])))
+            .mapControls {
+                HStack {
+                    MapCompass()
+                }
             }
-        }
-        .task(id: viewModel.filteredRestaurants) {
-            for restaurant in viewModel.filteredRestaurants {
-                let idString = restaurant.id.rawValue
-                if let mapItem = await FetchMapItem.getByString(from: idString) {
-                    mapItems[idString] = mapItem
+            .onChange(of: viewModel.selectedFeature) { _, newValue in
+                guard let feature = newValue else { return }
+                
+                guard let category = feature.pointOfInterestCategory else { return }
+                guard FetchMapItem.foodCategories.contains(category) else { return }
+                viewModel.handleChangeFeature(feature: feature)
+            }
+            .onChange(of: viewModel.mapItem) { _, newValue in
+                if let newItem = newValue {
+                    viewModel.handleChangeMapItem(mapItem: newItem)
+                }
+            }
+            .task(id: viewModel.filteredRestaurants) {
+                for restaurant in viewModel.filteredRestaurants {
+                    let idString = restaurant.id.rawValue
+                    if let mapItem = await FetchMapItem.getByString(from: idString) {
+                        mapItems[idString] = mapItem
+                    }
+                }
+            }
+            .onMapCameraChange(frequency: .onEnd) { context in
+                self.visibleMeters = context.region.span.latitudeDelta * 111_000
+            }
+            .onTapGesture { screenPoint in
+                let coordinate = proxy.convert(screenPoint, from: .local)
+                Task {
+                    await viewModel.handleMapTap(coordinate: coordinate, distance: visibleMeters)
                 }
             }
         }
     }
     
-    var buttonsSection: some View {
-        HStack {
+    var accountsToolBar: some View {
+        Button {
+            showAccount = true
+        } label: {
+            Label(
+                session.user == nil ? "Log in / Sign up" : "My account",
+                systemImage: session.user == nil
+                ? "person" : "person.crop.circle.fill"
+            )
+            .font(.subheadline.weight(.semibold))
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(.regularMaterial, in: Capsule())
+        }
+    }
+    
+    var mapButtonsSection: some View {
+        HStack(spacing: 0) {
+            selectModeButton
+                .frame(width: 60)
+            Divider()
+                .frame(height: 24)
+            currentLocationButton
+                .frame(width: 60)
+        }
+        .background(RoundedRectangle(cornerRadius: 12).fill(.thinMaterial))
+        //        .frame(maxHeight: 40)
+    }
+    
+    var selectModeButton: some View {
+        Button {
+            withAnimation(reduceMotion ? nil: .easeInOut(duration: 0.2)) {
+                viewModel.selectionModeEnabled.toggle()
+            }
+        } label: {
+            Image(systemName: "mappin.circle")
+                .symbolVariant(viewModel.selectionModeEnabled ? .fill : .none)
+            //                .padding(10)
+                .foregroundStyle(.red)
+                .frame(width: 60, height: 44)
+                .background {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(viewModel.selectionModeEnabled ? Color.red.opacity(0.15) : Color.clear)
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Select map location")
+        .accessibilityValue(
+            viewModel.selectionModeEnabled ? "On" : "Off"
+        )
+        .sensoryFeedback(
+            .selection,
+            trigger: viewModel.selectionModeEnabled
+        )
+    }
+    
+    var currentLocationButton: some View {
+        Button {
+            locationManager.requestPermissionAccess(onAuthorize: {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    viewModel.cameraPosition = .userLocation(fallback: .automatic)
+                }
+            }, onUnauthorized: { alertItem in
+                viewModel.alertItem = alertItem
+            })
+        } label: {
+            Image(systemName: "location")
+            //                .padding(10)
+            //                .background(.thinMaterial)
+            //                .clipShape(Circle())
+        }
+    }
+    
+    var operationsButtonsSection: some View {
+        HStack(spacing: 0) {
             Button {
                 viewModel.presentFilterSheet = true
             } label: {
-                Text("Filter").font(.system(size: 20))
+                Label("Filter", systemImage: "line.3.horizontal.decrease")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
-            .frame(width: 150)
-            
-            Rectangle()
-                .fill(.black)
-                .frame(width: 0.5)
+            Divider()
+                .frame(height: 24)
             
             Button {
                 viewModel.presentResultsSheet = true
             } label: {
-                Text("Results").font(.system(size: 20))
+                Label("Results", systemImage: "list.bullet")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
-            .frame(width: 150)
+            //            .contentShape(Rectangle())
+            //            .frame(width: 150)
         }
         .buttonStyle(.plain)
-        .foregroundStyle(.gray)
-        .background(.white)
-        .clipShape(Capsule())
+        .foregroundStyle(.primary)
+        .background(.regularMaterial)
+        .cornerRadius(22)
+        //        .clipShape(Capsule())
+//        .padding(5)
+        .frame(maxWidth: 340)
         .overlay(
             Capsule().strokeBorder(.black.opacity(0.4), lineWidth: 1.5)
         )
-        .fixedSize(horizontal: false, vertical: true)
+        //        .fixedSize(horizontal: false, vertical: true)
     }
 }
+
+struct RestaurantPin: View {
+    var color: Color = .purple
+    var icon: String = "star.fill"
+    
+    var body: some View {
+        VStack(spacing: -1) {
+            ZStack {
+                Circle()
+                    .fill(color)
+                    .frame(width: 20, height: 20)
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            
+            Image(systemName: "triangle.fill")
+                .resizable()
+                .frame(width: 8, height: 6)
+                .rotationEffect(.degrees(180))
+                .foregroundStyle(color)
+            
+            Ellipse()
+                .fill(.black.opacity(0.2))
+                .frame(width: 14, height: 4)
+                .offset(y: 1)
+        }
+    }
+}
+
+struct TargetPin: View {
+    var body: some View {
+        ZStack {
+            // Outer White Ring / Shadow Base
+            Circle()
+                .fill(.white)
+                .frame(width: 20, height: 20)
+                .shadow(color: .black.opacity(0.15), radius: 3, y: 1)
+            
+            // Inner Red Center Dot
+            Circle()
+                .fill(Color.red)
+                .frame(width: 15, height: 15)
+        }
+    }
+}
+
+//struct popupNote: View {
+//    var present: Bool
+//    var message: String
+//
+//    var body: some View {
+//        Text(message)
+//            .padding(10)
+//            .background(RoundedRectangle(cornerRadius: 5).fill(.black.opacity(0.6)))
+//            .foregroundStyle(.white)
+//    }
+//}
 
 #Preview {
     MapView()

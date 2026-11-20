@@ -7,6 +7,8 @@
 
 import Foundation
 
+/// Country nanmes and code mapping. Cuisine tags have country(code) that display the flag
+
 struct CountryGlossary {
     static let allowedCountryCodes: Set<String> = [
         "TH", // Thailand

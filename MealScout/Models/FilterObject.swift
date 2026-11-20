@@ -5,6 +5,7 @@
 //  Created by CLChou on 2026/10/6.
 //
 
+/// An object that stores what is necessary for a filter, can check against reviews to see if they match
 
 import Foundation
 struct FilterObject: Equatable {

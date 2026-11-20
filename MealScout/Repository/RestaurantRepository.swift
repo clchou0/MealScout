@@ -6,93 +6,83 @@
 //
 
 import Foundation
-import CoreData
 import MapKit
-
+import FirebaseAuth
+import FirebaseFirestore
 // @MainActor
 protocol RestaurantRepository {
-    func fetchAll() throws -> [Restaurant]
-    func save(_ review: Restaurant) throws
-    func delete(id: MapIdentifier) throws
-    func find(by id: MapIdentifier) throws -> Restaurant?
+    func fetchAll() async throws -> [Restaurant]
+    func save(_ restaurant: Restaurant) async throws
+    func delete(id: MapIdentifier) async throws
+    func find(by id: MapIdentifier) async throws -> Restaurant?
     
-    func findOrCreateRestaurant(id: MapIdentifier, restaurantName: String) throws -> Restaurant
-    func getTagsForRestaurant(id: MapIdentifier) throws -> [CuisineTag]
+    func findOrCreateRestaurant(id: MapIdentifier, restaurantName: String, lat: Double, lng: Double) async throws -> Restaurant
+    func getTagsForRestaurant(id: MapIdentifier) async throws -> [CuisineTag]
 }
 
 // @MainActor
-final class CoreDataRestaurantRepository: RestaurantRepository {
-    private let stack: CoreDataStack
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
-
-    init(stack: CoreDataStack = .shared) {
-        self.stack = stack
+final class FirebaseRestaurantRepository: RestaurantRepository {
+    private var collection: CollectionReference {
+        Firestore.firestore().collection("restaurants")
     }
     
-    func fetchAll() throws -> [Restaurant] {
-        let request: NSFetchRequest<RestaurantEntity> = RestaurantEntity.fetchRequest()
-        let entities: [RestaurantEntity] = try stack.context.fetch(request)
+    func fetchAll() async throws -> [Restaurant] {
+        let snapshot = try await collection.getDocuments(source: .server)
         
-        return try entities.compactMap { entity in
-            guard let data = entity.restaurantData else { return nil }
-            return try decoder.decode(Restaurant.self, from: data)
+        return try snapshot.documents.map {
+            try $0.data(as: Restaurant.self)
         }
     }
     
-    func save(_ restaurant: Restaurant) throws {
-        let request: NSFetchRequest<RestaurantEntity> = RestaurantEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", restaurant.id.rawValue)
+    func save(_ restaurant: Restaurant) async throws {
+        let data = try Firestore.Encoder().encode(restaurant)
         
-        let entity: RestaurantEntity
-        if let existingEntity = try stack.context.fetch(request).first {
-            entity = existingEntity
-        } else {
-            entity = RestaurantEntity(context: stack.context)
-            entity.id = restaurant.id.rawValue
-        }
-        
-        entity.restaurantData = try encoder.encode(restaurant)
-        try stack.save()
-    }
-
-    func delete(id: MapIdentifier) throws {
-        let request: NSFetchRequest<RestaurantEntity> = RestaurantEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", id.rawValue)
-
-        if let entity = try stack.context.fetch(request).first {
-            stack.context.delete(entity)
-            try stack.save()
-        }
+        try await collection
+            .document(restaurant.id.rawValue)
+            .setData(data)
     }
     
-    func find(by id: MapIdentifier) throws -> Restaurant? {
-        let request: NSFetchRequest<RestaurantEntity> = RestaurantEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", id.rawValue)
-        
-        guard let entity = try stack.context.fetch(request).first,
-              let data = entity.restaurantData else { return nil }
-        
-        return try? decoder.decode(Restaurant.self, from: data)
+    func delete(id: MapIdentifier) async throws {
+        try await collection.document(id.rawValue).delete()
     }
     
-    func findOrCreateRestaurant(id: MapIdentifier, restaurantName: String) throws -> Restaurant {
-        if var existing = try find(by: id) {
-            print("Restaurant exists")
-            existing.name = restaurantName
-            try save(existing)
+    func find(by id: MapIdentifier) async throws -> Restaurant? {
+        let snapshot = try await collection
+            .document(id.rawValue)
+            .getDocument(source: .server)
+        
+        guard snapshot.exists else {
+            return nil
+        }
+        
+        return try snapshot.data(as: Restaurant.self)
+    }
+    
+    func findOrCreateRestaurant(id: MapIdentifier, restaurantName: String, lat: Double, lng: Double) async throws -> Restaurant {
+        if let existing = try await find(by: id) {
             return existing
-        } else {
-            print("Restaurant \(id.rawValue) added")
-            let newRestaurant = Restaurant(id: id, name: restaurantName, tags: [])
-            try save(newRestaurant)
-            return newRestaurant
         }
+        
+        let restaurant = Restaurant(
+            id: id,
+            name: restaurantName,
+            tags: [],
+            latitude: lat,
+            longitude: lng
+        )
+        
+        try await save(restaurant)
+        
+        return restaurant
     }
     
-    func getTagsForRestaurant(id: MapIdentifier) throws -> [CuisineTag] {
-        if let restaurant = try find(by: id) {
-            return restaurant.tags
-        } else { return [] }
+    func getTagsForRestaurant(
+        id: MapIdentifier
+    ) async throws -> [CuisineTag] {
+        guard let restaurant = try await find(by: id) else {
+            return []
+        }
+        
+        return restaurant.tags
     }
 }
